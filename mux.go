@@ -45,7 +45,7 @@ func (r *Router) Handle(path string, verb string, handler http.Handler) {
 	route := r.routes[path]
 
 	if route == nil {
-		route := &Route{
+		route = &Route{
 			path:      path,
 			endpoints: make(verbHandlerMap),
 		}
@@ -72,11 +72,18 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if route == nil {
 		// route not found
 		handler = http.NotFoundHandler()
-	}
 
-	if handler = route.endpoints[method]; handler == nil {
-		// handler not found
-		handler = http.NotFoundHandler()
+	} else {
+		// route exists
+		endpoints := route.endpoints
+		if endpoints != nil {
+			if handler = route.endpoints[method]; handler == nil {
+				// handler not found
+				handler = http.NotFoundHandler()
+			}
+		} else {
+			handler = http.NotFoundHandler()
+		}
 	}
 
 	handler.ServeHTTP(w, req)
