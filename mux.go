@@ -60,17 +60,15 @@ func (r *Router) Handle(path string, verb string, handler http.Handler) {
 type handlerFunc func(http.ResponseWriter, *http.Request)
 
 // to wrap handlerFuncs
-type wrapper struct {
-	handler handlerFunc
-}
+type wrapper handlerFunc
 
 // wrapper implements http.Handler interface & delegates to its handler
-func (w *wrapper) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
-	w.handler(wri, req)
+func (w wrapper) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
+	w(wri, req)
 }
 
 func (r *Router) HandleFunc(path string, verb string, handler handlerFunc) {
-	r.Handle(path, verb, &wrapper{handler})
+	r.Handle(path, verb, wrapper(handler))
 }
 
 // satisfy Handler interface
