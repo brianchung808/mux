@@ -46,11 +46,9 @@ func TestRouteResponse(t *testing.T) {
 	// test recorder that implements http.ResponseWriter
 	w := httptest.NewRecorder()
 
-	handler := func(w http.ResponseWriter, req *http.Request) {
+	router.HandleFunc("/test", "GET", func(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(`yolo`))
-	}
-
-	router.HandleFunc("/test", "GET", handler)
+	})
 
 	req, err := http.NewRequest("GET", "/test", nil)
 
@@ -58,10 +56,31 @@ func TestRouteResponse(t *testing.T) {
 		t.Fail()
 	}
 
-	handler(w, req)
+	// call the router's ServeHTTP directly
+	router.ServeHTTP(w, req)
 
 	assert.Equal(t, "yolo", w.Body.String(), "Incorrect Body response")
+}
 
+func TestNonExistingRouteResponse(t *testing.T) {
+	router := NewRouter()
+
+	verbs := []string{"GET", "POST", "PUT", "PATCH", "DELETE"}
+
+	for _, verb := range verbs {
+		req, err := http.NewRequest(verb, "/test", nil)
+		if err != nil {
+			t.Fail()
+		}
+
+		w1 := httptest.NewRecorder()
+		router.ServeHTTP(w1, req)
+
+		w2 := httptest.NewRecorder()
+		http.NotFound(w2, req)
+
+		assert.Equal(t, w2.Body.String(), w1.Body.String(), "Incorrect body response")
+	}
 }
 
 func TestMultipleRouteData(t *testing.T) {
