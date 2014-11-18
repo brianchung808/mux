@@ -85,7 +85,6 @@ func testRoutePathInfo(t *testing.T, expected []string, router *Router) {
 }
 
 func testVerbs(t *testing.T, validVerbs []string, router *Router) {
-	i := 0
 	for path, route := range router.routes {
 		assert.Equal(t, route.path, path, "Path key not equal to route.path it is pointing to")
 
@@ -96,7 +95,5 @@ func testVerbs(t *testing.T, validVerbs []string, router *Router) {
 				assert.NotNil(t, endpoints[verb], "Endpoint "+verb+" missing")
 			}
 		}
-
-		i++
 	}
 }
