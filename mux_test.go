@@ -1,6 +1,7 @@
 package mux
 
 import (
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
 )
@@ -22,9 +23,8 @@ func (t *test) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func TestRouter(t *testing.T) {
 	router := NewRouter()
 
-	if router.routes == nil {
-		t.Error("Failed to init Router")
-	}
+	assert.NotNil(t, router, "For whatever reason, router is nil")
+	assert.NotNil(t, router.routes, "[]Routes not correctly initialized")
 }
 
 func TestRoute(t *testing.T) {
@@ -36,22 +36,14 @@ func TestRoute(t *testing.T) {
 
 	route := router.routes["/test"]
 
-	if route == nil {
-		t.Error("Route missing")
-	}
-
-	if route.path != "/test" {
-		t.Error("Path missing")
+	if assert.NotNil(t, route, "Route is missing") {
+		assert.Equal(t, route.path, "/test", "Path incorrect")
 	}
 
 	endpoints := route.endpoints
 
-	if endpoints == nil {
-		t.Error("Endpoints missing")
-	}
-
-	if endp := endpoints["GET"]; endp == nil {
-		t.Error("Endpoint GET missing")
+	if assert.NotNil(t, endpoints, "Endpoints are missing") {
+		assert.NotNil(t, endpoints["GET"], "Endpoint GET missing")
 	}
 }
 
@@ -68,41 +60,30 @@ func TestMultipleRoutes(t *testing.T) {
 
 	route := router.routes["/test1"]
 
-	if route == nil {
-		t.Error("Route missing")
-	}
-
-	if route.path != "/test1" {
-		t.Error("Path missing")
+	if assert.NotNil(t, route, "Route missing") {
+		assert.Equal(t, route.path, "/test1", "Path missing")
 	}
 
 	endpoints := route.endpoints
 
-	if endpoints == nil {
-		t.Error("Endpoints missing")
-	}
-
-	if endp := endpoints["GET"]; endp == nil {
-		t.Error("Endpoint GET missing")
+	if assert.NotNil(t, endpoints, "Endpoints missing") {
+		assert.NotNil(t, endpoints["GET"], "Endpoint GET missing")
+		assert.Nil(t, endpoints["POST"], "Unregistered endpoint not nil")
 	}
 
 	route = router.routes["/test2"]
 
-	if route == nil {
-		t.Error("Route missing")
-	}
+	route = router.routes["/test2"]
 
-	if route.path != "/test2" {
-		t.Error("Path missing")
+	if assert.NotNil(t, route, "Route missing") {
+		assert.NotEqual(t, route.path, "/test1", "Path missing")
 	}
 
 	endpoints = route.endpoints
 
-	if endpoints == nil {
-		t.Error("Endpoints missing")
+	if assert.NotNil(t, endpoints, "Endpoints missing") {
+		assert.NotNil(t, endpoints["GET"], "Endpoint GET missing")
+		assert.Nil(t, endpoints["POST"], "Unregistered endpoint not nil")
 	}
 
-	if endp := endpoints["GET"]; endp == nil {
-		t.Error("Endpoint GET missing")
-	}
 }
