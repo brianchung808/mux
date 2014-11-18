@@ -14,12 +14,6 @@ func (t *test) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(t.msg))
 }
 
-// var router *Router
-
-// func init() {
-// 	router = NewRouter()
-// }
-
 func TestRouter(t *testing.T) {
 	router := NewRouter()
 
@@ -56,6 +50,31 @@ func TestMultipleRoutes(t *testing.T) {
 
 	expected := []string{"/test1", "/test2"}
 
+	testRoutePathInfo(t, expected, router)
+
+	validVerbs := []string{"GET"}
+	testVerbs(t, validVerbs, router)
+}
+
+func TestMultipleVerbs(t *testing.T) {
+	router := NewRouter()
+
+	validVerbs := []string{"GET", "POST", "PATCH"}
+	for _, verb := range validVerbs {
+		router.HandleFunc("/test1", verb, func(w http.ResponseWriter, req *http.Request) {})
+	}
+
+	testVerbs(t, validVerbs, router)
+
+	expected := []string{"/test1"}
+	testRoutePathInfo(t, expected, router)
+}
+
+//************
+// Helpers
+//************
+
+func testRoutePathInfo(t *testing.T, expected []string, router *Router) {
 	for _, exp := range expected {
 		route, ok := router.routes[exp]
 
@@ -63,7 +82,9 @@ func TestMultipleRoutes(t *testing.T) {
 			assert.Equal(t, exp, route.path, "Path missing")
 		}
 	}
+}
 
+func testVerbs(t *testing.T, validVerbs []string, router *Router) {
 	i := 0
 	for path, route := range router.routes {
 		assert.Equal(t, route.path, path, "Path key not equal to route.path it is pointing to")
@@ -71,8 +92,9 @@ func TestMultipleRoutes(t *testing.T) {
 		endpoints := route.endpoints
 
 		if assert.NotNil(t, endpoints, "Endpoints missing") {
-			assert.NotNil(t, endpoints["GET"], "Endpoint GET missing")
-			assert.Nil(t, endpoints["POST"], "Unregistered endpoint not nil")
+			for _, verb := range validVerbs {
+				assert.NotNil(t, endpoints[verb], "Endpoint "+verb+" missing")
+			}
 		}
 
 		i++
