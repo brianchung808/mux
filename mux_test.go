@@ -22,12 +22,10 @@ func TestRouter(t *testing.T) {
 	assert.NotNil(t, router.routes, "[]Routes not correctly initialized")
 }
 
-func TestRoute(t *testing.T) {
+func TestRouteData(t *testing.T) {
 	router := NewRouter()
 
-	router.HandleFunc("/test", "GET", func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte(`yolo`))
-	})
+	router.HandleFunc("/test", "GET", func(w http.ResponseWriter, req *http.Request) {})
 
 	route := router.routes["/test"]
 
@@ -81,7 +79,7 @@ func TestMultipleRouteData(t *testing.T) {
 	testVerbs(t, validVerbs, router)
 }
 
-func TestMultipleVerbs(t *testing.T) {
+func TestMultipleVerbData(t *testing.T) {
 	router := NewRouter()
 
 	validVerbs := []string{"GET", "POST", "PATCH"}
