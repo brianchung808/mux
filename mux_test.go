@@ -37,7 +37,7 @@ func TestRoute(t *testing.T) {
 	route := router.routes["/test"]
 
 	if assert.NotNil(t, route, "Route is missing") {
-		assert.Equal(t, route.path, "/test", "Path incorrect")
+		assert.Equal(t, "/test", route.path, "Path incorrect")
 	}
 
 	endpoints := route.endpoints
@@ -58,32 +58,27 @@ func TestMultipleRoutes(t *testing.T) {
 		w.Write([]byte(`yolo`))
 	})
 
-	route := router.routes["/test1"]
+	expected := []string{"/test1", "/test2"}
 
-	if assert.NotNil(t, route, "Route missing") {
-		assert.Equal(t, route.path, "/test1", "Path missing")
+	for _, exp := range expected {
+		route, ok := router.routes[exp]
+
+		if assert.True(t, ok, "Route missing") {
+			assert.Equal(t, exp, route.path, "Path missing")
+		}
 	}
 
-	endpoints := route.endpoints
+	i := 0
+	for path, route := range router.routes {
+		assert.Equal(t, route.path, path, "Path key not equal to route.path it is pointing to")
 
-	if assert.NotNil(t, endpoints, "Endpoints missing") {
-		assert.NotNil(t, endpoints["GET"], "Endpoint GET missing")
-		assert.Nil(t, endpoints["POST"], "Unregistered endpoint not nil")
+		endpoints := route.endpoints
+
+		if assert.NotNil(t, endpoints, "Endpoints missing") {
+			assert.NotNil(t, endpoints["GET"], "Endpoint GET missing")
+			assert.Nil(t, endpoints["POST"], "Unregistered endpoint not nil")
+		}
+
+		i++
 	}
-
-	route = router.routes["/test2"]
-
-	route = router.routes["/test2"]
-
-	if assert.NotNil(t, route, "Route missing") {
-		assert.NotEqual(t, route.path, "/test1", "Path missing")
-	}
-
-	endpoints = route.endpoints
-
-	if assert.NotNil(t, endpoints, "Endpoints missing") {
-		assert.NotNil(t, endpoints["GET"], "Endpoint GET missing")
-		assert.Nil(t, endpoints["POST"], "Unregistered endpoint not nil")
-	}
-
 }
