@@ -50,13 +50,9 @@ func TestRoute(t *testing.T) {
 func TestMultipleRoutes(t *testing.T) {
 	router := NewRouter()
 
-	router.HandleFunc("/test1", "GET", func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte(`yolo`))
-	})
+	router.HandleFunc("/test1", "GET", func(w http.ResponseWriter, req *http.Request) {})
 
-	router.HandleFunc("/test2", "GET", func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte(`yolo`))
-	})
+	router.HandleFunc("/test2", "GET", func(w http.ResponseWriter, req *http.Request) {})
 
 	expected := []string{"/test1", "/test2"}
 
