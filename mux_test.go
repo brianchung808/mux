@@ -3,6 +3,7 @@ package mux
 import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -41,7 +42,31 @@ func TestRoute(t *testing.T) {
 	}
 }
 
-func TestMultipleRoutes(t *testing.T) {
+func TestRouteResponse(t *testing.T) {
+	router := NewRouter()
+
+	// test recorder that implements http.ResponseWriter
+	w := httptest.NewRecorder()
+
+	handler := func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte(`yolo`))
+	}
+
+	router.HandleFunc("/test", "GET", handler)
+
+	req, err := http.NewRequest("GET", "/test", nil)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	handler(w, req)
+
+	assert.Equal(t, "yolo", w.Body.String(), "Incorrect Body response")
+
+}
+
+func TestMultipleRouteData(t *testing.T) {
 	router := NewRouter()
 
 	router.HandleFunc("/test1", "GET", func(w http.ResponseWriter, req *http.Request) {})
