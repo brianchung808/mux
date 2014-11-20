@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -25,12 +26,12 @@ func TestRouter(t *testing.T) {
 func TestRouteData(t *testing.T) {
 	router := NewRouter()
 
-	router.HandleFunc("/test", "GET", func(w http.ResponseWriter, req *http.Request) {})
+	router.HandleFunc("/test/", "GET", func(w http.ResponseWriter, req *http.Request) {})
 
-	route := router.routes["/test"]
+	route := router.routes["/test/"]
 
 	if assert.NotNil(t, route, "Route is missing") {
-		assert.Equal(t, "/test", route.path, "Path incorrect")
+		assert.Equal(t, "/test/", route.path, "Path incorrect")
 	}
 
 	endpoints := route.endpoints
@@ -46,11 +47,11 @@ func TestRouteResponse(t *testing.T) {
 	// test recorder that implements http.ResponseWriter
 	w := httptest.NewRecorder()
 
-	router.HandleFunc("/test", "GET", func(w http.ResponseWriter, req *http.Request) {
+	router.HandleFunc("/test/", "GET", func(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(`yolo`))
 	})
 
-	req, err := http.NewRequest("GET", "/test", nil)
+	req, err := http.NewRequest("GET", "/test/", nil)
 
 	if err != nil {
 		t.Fail()
@@ -68,7 +69,7 @@ func TestNonExistingRouteResponse(t *testing.T) {
 	verbs := []string{"GET", "POST", "PUT", "PATCH", "DELETE"}
 
 	for _, verb := range verbs {
-		req, err := http.NewRequest(verb, "/test", nil)
+		req, err := http.NewRequest(verb, "/test/", nil)
 		if err != nil {
 			t.Fail()
 		}
@@ -86,11 +87,11 @@ func TestNonExistingRouteResponse(t *testing.T) {
 func TestMultipleRouteData(t *testing.T) {
 	router := NewRouter()
 
-	router.HandleFunc("/test1", "GET", func(w http.ResponseWriter, req *http.Request) {})
+	router.HandleFunc("/test1/", "GET", func(w http.ResponseWriter, req *http.Request) {})
 
-	router.HandleFunc("/test2", "GET", func(w http.ResponseWriter, req *http.Request) {})
+	router.HandleFunc("/test2/", "GET", func(w http.ResponseWriter, req *http.Request) {})
 
-	expected := []string{"/test1", "/test2"}
+	expected := []string{"/test1/", "/test2/"}
 
 	testRoutePathInfo(t, expected, router)
 
@@ -103,13 +104,40 @@ func TestMultipleVerbData(t *testing.T) {
 
 	validVerbs := []string{"GET", "POST", "PATCH"}
 	for _, verb := range validVerbs {
-		router.HandleFunc("/test1", verb, func(w http.ResponseWriter, req *http.Request) {})
+		router.HandleFunc("/test1/", verb, func(w http.ResponseWriter, req *http.Request) {})
 	}
 
 	testVerbs(t, validVerbs, router)
 
-	expected := []string{"/test1"}
+	expected := []string{"/test1/"}
 	testRoutePathInfo(t, expected, router)
+}
+
+func TestCleanupPath(t *testing.T) {
+	paths := []string{
+		"/hello/hi",
+		"/hello",
+		"/hello/hi      ",
+		"/hello     ",
+		"",
+		" ",
+	}
+
+	expPaths := []string{
+		"/hello/hi/",
+		"/hello/",
+		"/hello/hi/",
+		"/hello/",
+		"/",
+		"/",
+	}
+
+	for i, path := range paths {
+		newPath := cleanupPath(strings.NewReader(path))
+		exp := expPaths[i]
+
+		assert.Equal(t, exp, newPath, "Paths not equal")
+	}
 }
 
 //************
