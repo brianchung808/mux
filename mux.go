@@ -1,7 +1,10 @@
 package mux
 
 import (
+	"bytes"
+	"io"
 	"net/http"
+	"strings"
 )
 
 /*
@@ -41,7 +44,29 @@ func NewRouter() *Router {
 	}
 }
 
-func (r *Router) Handle(path string, verb string, handler http.Handler) {
+func (r *Router) GET(path string, handler http.Handler) {
+	r.handle(path, "GET", handler)
+}
+
+func (r *Router) POST(path string, handler http.Handler) {
+	r.handle(path, "POST", handler)
+}
+
+func (r *Router) DELETE(path string, handler http.Handler) {
+	r.handle(path, "DELETE", handler)
+}
+
+func (r *Router) PUT(path string, handler http.Handler) {
+	r.handle(path, "PUT", handler)
+}
+
+func (r *Router) PATCH(path string, handler http.Handler) {
+	r.handle(path, "PATCH", handler)
+}
+
+func (r *Router) handle(path string, verb string, handler http.Handler) {
+	// clean up path
+	path = cleanupPath(strings.NewReader(path))
 	route := r.routes[path]
 
 	if route == nil {
@@ -68,7 +93,7 @@ func (w wrapper) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) HandleFunc(path string, verb string, handler handlerFunc) {
-	r.Handle(path, verb, wrapper(handler))
+	r.handle(path, verb, wrapper(handler))
 }
 
 // satisfy Handler interface
@@ -91,7 +116,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		// route exists
 		endpoints := route.endpoints
 		if endpoints != nil {
-			if handler = route.endpoints[method]; handler == nil {
+			var ok bool
+			if handler, ok = endpoints[method]; !ok {
 				// handler not found
 				handler = http.NotFoundHandler()
 			}
@@ -101,4 +127,27 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	handler.ServeHTTP(w, req)
+}
+
+func cleanupPath(path io.Reader) string {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(path)
+
+	pathBytes := buf.Bytes()
+
+	// trim
+	pathBytes = bytes.Trim(pathBytes, " ")
+
+	len := len(pathBytes)
+	// empty case
+	if len == 0 {
+		return "/"
+	}
+
+	// check for trailing '/'
+	if pathBytes[len-1] != '/' {
+		pathBytes = append(pathBytes, '/')
+	}
+
+	return string(pathBytes)
 }
