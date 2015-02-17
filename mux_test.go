@@ -111,6 +111,7 @@ func TestMultipleVerbData(t *testing.T) {
 
 	expected := []string{"/test1/"}
 	testRoutePathInfo(t, expected, router)
+
 }
 
 func TestCleanupPath(t *testing.T) {
@@ -138,6 +139,50 @@ func TestCleanupPath(t *testing.T) {
 
 		assert.Equal(t, exp, newPath, "Paths not equal")
 	}
+}
+
+func TestHandleAll(t *testing.T) {
+	router := NewRouter()
+
+	router.HandleAll("/test/", Endpoint{
+		Get:  func(w http.ResponseWriter, req *http.Request) { w.Write([]byte(`GET`)) },
+		Post: func(w http.ResponseWriter, req *http.Request) { w.Write([]byte(`POST`)) },
+	})
+
+	validVerbs := []int{GET, POST}
+
+	// test if routes registered
+	testVerbs(t, validVerbs, router)
+
+	expected := []string{"/test/"}
+	testRoutePathInfo(t, expected, router)
+
+	// test recorder that implements http.ResponseWriter
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/test/", nil)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	// call the router's ServeHTTP directly
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, "GET", w.Body.String(), "Incorrect Body response")
+
+	w = httptest.NewRecorder()
+
+	req, err = http.NewRequest("POST", "/test/", nil)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	// call the router's ServeHTTP directly
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, "POST", w.Body.String(), "Incorrect Body response")
 }
 
 //************

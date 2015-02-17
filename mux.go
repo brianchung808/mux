@@ -37,6 +37,27 @@ const (
 	NUM_VERBS
 )
 
+func (r router) HandleAll(path string, endpoint Endpoint) {
+	r.Get(path, endpoint.Get)
+	r.Post(path, endpoint.Post)
+	r.Put(path, endpoint.Put)
+	r.Patch(path, endpoint.Patch)
+	r.Delete(path, endpoint.Delete)
+	r.Options(path, endpoint.Options)
+	r.Head(path, endpoint.Head)
+}
+
+// struct for user's to register all of their endpoints at once
+type Endpoint struct {
+	Get     http.HandlerFunc
+	Post    http.HandlerFunc
+	Put     http.HandlerFunc
+	Patch   http.HandlerFunc
+	Delete  http.HandlerFunc
+	Options http.HandlerFunc
+	Head    http.HandlerFunc
+}
+
 type route struct {
 	path      string
 	endpoints []http.Handler
