@@ -25,12 +25,24 @@ r.Handle("/restaurant")
 
 */
 
+// enum for common http verbs
+const (
+	GET = iota
+	POST
+	PUT
+	PATCH
+	DELETE
+	OPTIONS
+	HEAD
+	NUM_VERBS
+)
+
 // verb -> handler
-type verbHandlerMap map[string]http.Handler
+type verbHandlerList []http.Handler
 
 type route struct {
 	path      string
-	endpoints verbHandlerMap
+	endpoints verbHandlerList
 }
 
 type router struct {
@@ -45,26 +57,26 @@ func NewRouter() *router {
 }
 
 func (r *router) Get(path string, handler http.Handler) {
-	r.handle(path, "GET", handler)
+	r.handle(path, GET, handler)
 }
 
 func (r *router) Post(path string, handler http.Handler) {
-	r.handle(path, "POST", handler)
+	r.handle(path, POST, handler)
 }
 
 func (r *router) Delete(path string, handler http.Handler) {
-	r.handle(path, "DELETE", handler)
+	r.handle(path, DELETE, handler)
 }
 
 func (r *router) Put(path string, handler http.Handler) {
-	r.handle(path, "PUT", handler)
+	r.handle(path, PUT, handler)
 }
 
 func (r *router) Patch(path string, handler http.Handler) {
-	r.handle(path, "PATCH", handler)
+	r.handle(path, PATCH, handler)
 }
 
-func (r *router) handle(path string, verb string, handler http.Handler) {
+func (r *router) handle(path string, verb int, handler http.Handler) {
 	// clean up path
 	path = cleanupPath(strings.NewReader(path))
 	currentRoute := r.routes[path]
@@ -73,7 +85,7 @@ func (r *router) handle(path string, verb string, handler http.Handler) {
 	if currentRoute == nil {
 		currentRoute = &route{
 			path:      path,
-			endpoints: make(verbHandlerMap),
+			endpoints: make(verbHandlerList, NUM_VERBS, NUM_VERBS),
 		}
 		// set the new route
 		r.routes[path] = currentRoute
@@ -91,7 +103,7 @@ func (r routeHandlerFunc) ServeHTTP(wri http.ResponseWriter, req *http.Request) 
 	r(wri, req)
 }
 
-func (r *router) HandleFunc(path string, verb string, handler routeHandlerFunc) {
+func (r *router) HandleFunc(path string, verb int, handler routeHandlerFunc) {
 	r.handle(path, verb, routeHandlerFunc(handler))
 }
 
@@ -100,6 +112,21 @@ func (r *router) HandleFunc(path string, verb string, handler routeHandlerFunc) 
 func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
 	method := req.Method
+
+	var methodEnum int
+
+	switch method {
+	case "GET":
+		methodEnum = GET
+	case "POST":
+		methodEnum = POST
+	case "PUT":
+		methodEnum = PUT
+	case "DELETE":
+		methodEnum = DELETE
+	case "PATCH":
+		methodEnum = PATCH
+	}
 
 	// find the corresponding Route in Router & call it's handler.
 	route, ok := r.routes[path]
@@ -110,14 +137,11 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if !ok {
 		// route not found
 		handler = http.NotFoundHandler()
-
 	} else {
 		// route exists
 		endpoints := route.endpoints
 		if endpoints != nil {
-			var ok bool
-			// get the route's handler
-			if handler, ok = endpoints[method]; !ok {
+			if handler = endpoints[methodEnum]; handler == nil {
 				// handler not found
 				handler = http.NotFoundHandler()
 			}

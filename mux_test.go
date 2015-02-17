@@ -26,7 +26,7 @@ func TestRouter(t *testing.T) {
 func TestRouteData(t *testing.T) {
 	router := NewRouter()
 
-	router.HandleFunc("/test/", "GET", func(w http.ResponseWriter, req *http.Request) {})
+	router.HandleFunc("/test/", GET, func(w http.ResponseWriter, req *http.Request) {})
 
 	route := router.routes["/test/"]
 
@@ -37,7 +37,7 @@ func TestRouteData(t *testing.T) {
 	endpoints := route.endpoints
 
 	if assert.NotNil(t, endpoints, "Endpoints are missing") {
-		assert.NotNil(t, endpoints["GET"], "Endpoint GET missing")
+		assert.NotNil(t, endpoints[GET], "Endpoint GET missing")
 	}
 }
 
@@ -47,7 +47,7 @@ func TestRouteResponse(t *testing.T) {
 	// test recorder that implements http.ResponseWriter
 	w := httptest.NewRecorder()
 
-	router.HandleFunc("/test/", "GET", func(w http.ResponseWriter, req *http.Request) {
+	router.HandleFunc("/test/", GET, func(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(`yolo`))
 	})
 
@@ -87,22 +87,22 @@ func TestNonExistingRouteResponse(t *testing.T) {
 func TestMultipleRouteData(t *testing.T) {
 	router := NewRouter()
 
-	router.HandleFunc("/test1/", "GET", func(w http.ResponseWriter, req *http.Request) {})
+	router.HandleFunc("/test1/", GET, func(w http.ResponseWriter, req *http.Request) {})
 
-	router.HandleFunc("/test2/", "GET", func(w http.ResponseWriter, req *http.Request) {})
+	router.HandleFunc("/test2/", GET, func(w http.ResponseWriter, req *http.Request) {})
 
 	expected := []string{"/test1/", "/test2/"}
 
 	testRoutePathInfo(t, expected, router)
 
-	validVerbs := []string{"GET"}
+	validVerbs := []int{GET}
 	testVerbs(t, validVerbs, router)
 }
 
 func TestMultipleVerbData(t *testing.T) {
 	router := NewRouter()
 
-	validVerbs := []string{"GET", "POST", "PATCH"}
+	validVerbs := []int{GET, POST, PATCH}
 	for _, verb := range validVerbs {
 		router.HandleFunc("/test1/", verb, func(w http.ResponseWriter, req *http.Request) {})
 	}
@@ -154,7 +154,7 @@ func testRoutePathInfo(t *testing.T, expected []string, router *router) {
 	}
 }
 
-func testVerbs(t *testing.T, validVerbs []string, router *router) {
+func testVerbs(t *testing.T, validVerbs []int, router *router) {
 	for path, route := range router.routes {
 		assert.Equal(t, route.path, path, "Path key not equal to route.path it is pointing to")
 
@@ -162,7 +162,7 @@ func testVerbs(t *testing.T, validVerbs []string, router *router) {
 
 		if assert.NotNil(t, endpoints, "Endpoints missing") {
 			for _, verb := range validVerbs {
-				assert.NotNil(t, endpoints[verb], "Endpoint "+verb+" missing")
+				assert.NotNil(t, endpoints[verb], "Endpoint missing")
 			}
 		}
 	}
