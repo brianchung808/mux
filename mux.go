@@ -37,12 +37,9 @@ const (
 	NUM_VERBS
 )
 
-// verb -> handler
-type verbHandlerList []http.Handler
-
 type route struct {
 	path      string
-	endpoints verbHandlerList
+	endpoints []http.Handler
 }
 
 type router struct {
@@ -85,7 +82,7 @@ func (r *router) handle(path string, verb int, handler http.Handler) {
 	if currentRoute == nil {
 		currentRoute = &route{
 			path:      path,
-			endpoints: make(verbHandlerList, NUM_VERBS, NUM_VERBS),
+			endpoints: make([]http.Handler, NUM_VERBS, NUM_VERBS),
 		}
 		// set the new route
 		r.routes[path] = currentRoute
