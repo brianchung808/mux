@@ -28,58 +28,58 @@ r.Handle("/restaurant")
 // verb -> handler
 type verbHandlerMap map[string]http.Handler
 
-type Route struct {
+type route struct {
 	path      string
 	endpoints verbHandlerMap
 }
 
-type Router struct {
+type router struct {
 	// (path_URI -> route) map.
-	routes map[string]*Route
+	routes map[string]*route
 }
 
-func NewRouter() *Router {
-	return &Router{
-		routes: make(map[string]*Route),
+func NewRouter() *router {
+	return &router{
+		routes: make(map[string]*route),
 	}
 }
 
-func (r *Router) GET(path string, handler http.Handler) {
+func (r *router) Get(path string, handler http.Handler) {
 	r.handle(path, "GET", handler)
 }
 
-func (r *Router) POST(path string, handler http.Handler) {
+func (r *router) Post(path string, handler http.Handler) {
 	r.handle(path, "POST", handler)
 }
 
-func (r *Router) DELETE(path string, handler http.Handler) {
+func (r *router) Delete(path string, handler http.Handler) {
 	r.handle(path, "DELETE", handler)
 }
 
-func (r *Router) PUT(path string, handler http.Handler) {
+func (r *router) Put(path string, handler http.Handler) {
 	r.handle(path, "PUT", handler)
 }
 
-func (r *Router) PATCH(path string, handler http.Handler) {
+func (r *router) Patch(path string, handler http.Handler) {
 	r.handle(path, "PATCH", handler)
 }
 
-func (r *Router) handle(path string, verb string, handler http.Handler) {
+func (r *router) handle(path string, verb string, handler http.Handler) {
 	// clean up path
 	path = cleanupPath(strings.NewReader(path))
-	route := r.routes[path]
+	currentRoute := r.routes[path]
 
-	if route == nil {
-		route = &Route{
+	if currentRoute == nil {
+		currentRoute = &route{
 			path:      path,
 			endpoints: make(verbHandlerMap),
 		}
 		// set the new route
-		r.routes[path] = route
+		r.routes[path] = currentRoute
 	}
 
 	// set the handler
-	route.endpoints[verb] = handler
+	currentRoute.endpoints[verb] = handler
 }
 
 type handlerFunc func(http.ResponseWriter, *http.Request)
@@ -92,13 +92,13 @@ func (w wrapper) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
 	w(wri, req)
 }
 
-func (r *Router) HandleFunc(path string, verb string, handler handlerFunc) {
+func (r *router) HandleFunc(path string, verb string, handler handlerFunc) {
 	r.handle(path, verb, wrapper(handler))
 }
 
 // satisfy Handler interface
 // handles all requests & delegate to other routes.
-func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
 	method := req.Method
 

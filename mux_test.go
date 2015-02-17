@@ -144,7 +144,7 @@ func TestCleanupPath(t *testing.T) {
 // Helpers
 //************
 
-func testRoutePathInfo(t *testing.T, expected []string, router *Router) {
+func testRoutePathInfo(t *testing.T, expected []string, router *router) {
 	for _, exp := range expected {
 		route, ok := router.routes[exp]
 
@@ -154,7 +154,7 @@ func testRoutePathInfo(t *testing.T, expected []string, router *Router) {
 	}
 }
 
-func testVerbs(t *testing.T, validVerbs []string, router *Router) {
+func testVerbs(t *testing.T, validVerbs []string, router *router) {
 	for path, route := range router.routes {
 		assert.Equal(t, route.path, path, "Path key not equal to route.path it is pointing to")
 
