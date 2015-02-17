@@ -73,6 +73,14 @@ func (r *router) Patch(path string, handler http.Handler) {
 	r.handle(path, PATCH, handler)
 }
 
+func (r *router) Options(path string, handler http.Handler) {
+	r.handle(path, OPTIONS, handler)
+}
+
+func (r *router) Head(path string, handler http.Handler) {
+	r.handle(path, HEAD, handler)
+}
+
 func (r *router) handle(path string, verb int, handler http.Handler) {
 	// clean up path
 	path = cleanupPath(strings.NewReader(path))
