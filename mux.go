@@ -7,24 +7,6 @@ import (
 	"strings"
 )
 
-/*
-Usage:
-r := mux.NewRouter()
-r.Handle("/restaurant", "GET", func(w ResponseWriter, r *Request) {
-
-})
-
-r.HandleAll("/restaurant', Endpoint{
-	GET: Handler,
-	POST: Handler,
-	...
-})
-
-
-r.Handle("/restaurant")
-
-*/
-
 // enum for common http verbs
 const (
 	GET = iota
