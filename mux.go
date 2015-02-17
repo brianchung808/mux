@@ -92,16 +92,8 @@ func (r *router) handle(path string, verb int, handler http.Handler) {
 	currentRoute.endpoints[verb] = handler
 }
 
-// for function literals being passed as route handler
-type routeHandlerFunc func(http.ResponseWriter, *http.Request)
-
-// handlerFunc implements http.Handler interface & delegates to its handler
-func (r routeHandlerFunc) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
-	r(wri, req)
-}
-
-func (r *router) HandleFunc(path string, verb int, handler routeHandlerFunc) {
-	r.handle(path, verb, routeHandlerFunc(handler))
+func (r *router) HandleFunc(path string, verb int, handler http.HandlerFunc) {
+	r.handle(path, verb, handler)
 }
 
 // satisfy http.Handler interface
