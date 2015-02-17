@@ -95,19 +95,19 @@ func (r *router) HandleFunc(path string, verb string, handler routeHandlerFunc) 
 	r.handle(path, verb, routeHandlerFunc(handler))
 }
 
-// satisfy Handler interface
-// handles all requests & delegate to other routes.
+// satisfy http.Handler interface
+// router handles all requests & delegate to other routes.
 func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
 	method := req.Method
 
 	// find the corresponding Route in Router & call it's handler.
-	route := r.routes[path]
+	route, ok := r.routes[path]
 
 	// the handler we will be delegating to
 	var handler http.Handler
 
-	if route == nil {
+	if !ok {
 		// route not found
 		handler = http.NotFoundHandler()
 
@@ -116,6 +116,7 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		endpoints := route.endpoints
 		if endpoints != nil {
 			var ok bool
+			// get the route's handler
 			if handler, ok = endpoints[method]; !ok {
 				// handler not found
 				handler = http.NotFoundHandler()
