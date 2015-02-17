@@ -18,7 +18,7 @@ r.HandleFunc("/restaurant", "GET", func(w ResponseWriter, r *Request) {
 })
 
 // register multiple routes specified in Endpoint struct
-r.HandleAll("/restaurant', Endpoint{
+r.HandleAll("/restaurant", Endpoint{
 	Get: func(w http.ResponseWriter, req * http.Request) {},
 	Post: func(w http.ResponseWriter, req * http.Request) {},
 	...
