@@ -69,6 +69,7 @@ func (r *router) handle(path string, verb string, handler http.Handler) {
 	path = cleanupPath(strings.NewReader(path))
 	currentRoute := r.routes[path]
 
+	// check if route exists or not
 	if currentRoute == nil {
 		currentRoute = &route{
 			path:      path,
@@ -82,18 +83,16 @@ func (r *router) handle(path string, verb string, handler http.Handler) {
 	currentRoute.endpoints[verb] = handler
 }
 
-type handlerFunc func(http.ResponseWriter, *http.Request)
+// for function literals being passed as route handler
+type routeHandlerFunc func(http.ResponseWriter, *http.Request)
 
-// to wrap handlerFuncs
-type wrapper handlerFunc
-
-// wrapper implements http.Handler interface & delegates to its handler
-func (w wrapper) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
-	w(wri, req)
+// handlerFunc implements http.Handler interface & delegates to its handler
+func (r routeHandlerFunc) ServeHTTP(wri http.ResponseWriter, req *http.Request) {
+	r(wri, req)
 }
 
-func (r *router) HandleFunc(path string, verb string, handler handlerFunc) {
-	r.handle(path, verb, wrapper(handler))
+func (r *router) HandleFunc(path string, verb string, handler routeHandlerFunc) {
+	r.handle(path, verb, routeHandlerFunc(handler))
 }
 
 // satisfy Handler interface
