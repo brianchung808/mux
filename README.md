@@ -1,4 +1,6 @@
 mux
 ===
 
-Testing out golang by implementing a mux for http routing
+HTTP routing library compatible with `http.Handler` interface.
+
+Testing out go-lang.
