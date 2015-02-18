@@ -118,7 +118,7 @@ func (r router) HandleAll(path string, endpoint Endpoint) {
 // satisfy http.Handler interface
 // router handles all requests & delegate to other routes.
 func (r router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	path := req.URL.Path
+	path := cleanupPath(strings.NewReader(req.URL.Path))
 	method := req.Method
 
 	var methodEnum int
