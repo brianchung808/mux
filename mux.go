@@ -45,7 +45,7 @@ func NewRouter() *router {
 }
 
 // register a handler for the specified path for the method
-func (r *router) handle(path string, method int, handler http.Handler) {
+func (r router) handle(path string, method int, handler http.Handler) {
 	// clean up path
 	path = cleanupPath(strings.NewReader(path))
 	currentRoute := r.routes[path]
@@ -65,42 +65,42 @@ func (r *router) handle(path string, method int, handler http.Handler) {
 }
 
 // register handler for Get
-func (r *router) Get(path string, handler http.Handler) {
+func (r router) Get(path string, handler http.Handler) {
 	r.handle(path, GET, handler)
 }
 
 // register handler for Post
-func (r *router) Post(path string, handler http.Handler) {
+func (r router) Post(path string, handler http.Handler) {
 	r.handle(path, POST, handler)
 }
 
 // register handler for Delete
-func (r *router) Delete(path string, handler http.Handler) {
+func (r router) Delete(path string, handler http.Handler) {
 	r.handle(path, DELETE, handler)
 }
 
 // register handler for Put
-func (r *router) Put(path string, handler http.Handler) {
+func (r router) Put(path string, handler http.Handler) {
 	r.handle(path, PUT, handler)
 }
 
 // register handler for Patch
-func (r *router) Patch(path string, handler http.Handler) {
+func (r router) Patch(path string, handler http.Handler) {
 	r.handle(path, PATCH, handler)
 }
 
 // register handler for Options
-func (r *router) Options(path string, handler http.Handler) {
+func (r router) Options(path string, handler http.Handler) {
 	r.handle(path, OPTIONS, handler)
 }
 
 // register handler for Head
-func (r *router) Head(path string, handler http.Handler) {
+func (r router) Head(path string, handler http.Handler) {
 	r.handle(path, HEAD, handler)
 }
 
 // register handler for specified method
-func (r *router) HandleFunc(path string, method int, handler http.HandlerFunc) {
+func (r router) HandleFunc(path string, method int, handler http.HandlerFunc) {
 	r.handle(path, method, handler)
 }
 
@@ -117,7 +117,7 @@ func (r router) HandleAll(path string, endpoint Endpoint) {
 
 // satisfy http.Handler interface
 // router handles all requests & delegate to other routes.
-func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (r router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
 	method := req.Method
 
