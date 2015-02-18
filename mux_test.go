@@ -152,7 +152,7 @@ func TestCleanupPath(t *testing.T) {
 func TestHandleAll(t *testing.T) {
 	router := NewRouter()
 
-	router.HandleAll("/test/", Endpoint{
+	router.HandleAll("/test/", Handlers{
 		Get:  func(w http.ResponseWriter, req *http.Request) { w.Write([]byte(`GET`)) },
 		Post: func(w http.ResponseWriter, req *http.Request) { w.Write([]byte(`POST`)) },
 	})

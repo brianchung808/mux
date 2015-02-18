@@ -21,7 +21,7 @@ const (
 )
 
 // struct for user's to register all of their endpoints at once
-type Endpoint struct {
+type Handlers struct {
 	Get     http.HandlerFunc
 	Post    http.HandlerFunc
 	Put     http.HandlerFunc
@@ -104,15 +104,15 @@ func (r router) HandleFunc(path string, method int, handler http.HandlerFunc) {
 	r.handle(path, method, handler)
 }
 
-// register multiple handlers at once with an Endpoint struct
-func (r router) HandleAll(path string, endpoint Endpoint) {
-	r.Get(path, endpoint.Get)
-	r.Post(path, endpoint.Post)
-	r.Put(path, endpoint.Put)
-	r.Patch(path, endpoint.Patch)
-	r.Delete(path, endpoint.Delete)
-	r.Options(path, endpoint.Options)
-	r.Head(path, endpoint.Head)
+// register multiple handlers at once with an Handlers struct
+func (r router) HandleAll(path string, h Handlers) {
+	r.Get(path, h.Get)
+	r.Post(path, h.Post)
+	r.Put(path, h.Put)
+	r.Patch(path, h.Patch)
+	r.Delete(path, h.Delete)
+	r.Options(path, h.Options)
+	r.Head(path, h.Head)
 }
 
 // satisfy http.Handler interface
