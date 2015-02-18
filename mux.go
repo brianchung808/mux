@@ -121,20 +121,7 @@ func (r router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := cleanupPath(strings.NewReader(req.URL.Path))
 	method := req.Method
 
-	var methodEnum int
-
-	switch method {
-	case "GET":
-		methodEnum = GET
-	case "POST":
-		methodEnum = POST
-	case "PUT":
-		methodEnum = PUT
-	case "DELETE":
-		methodEnum = DELETE
-	case "PATCH":
-		methodEnum = PATCH
-	}
+	methodEnum := getMethodEnum(method)
 
 	// find the corresponding Route in Router & call it's handler.
 	route, ok := r.routes[path]
@@ -153,6 +140,23 @@ func (r router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	handler.ServeHTTP(w, req)
+}
+
+func getMethodEnum(method string) (methodEnum int) {
+	switch method {
+	case "GET":
+		methodEnum = GET
+	case "POST":
+		methodEnum = POST
+	case "PUT":
+		methodEnum = PUT
+	case "DELETE":
+		methodEnum = DELETE
+	case "PATCH":
+		methodEnum = PATCH
+	}
+
+	return
 }
 
 // helper to cleanup user inputted path string
