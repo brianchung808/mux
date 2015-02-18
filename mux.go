@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// enum for common http verbs
+// enum for common http methods
 const (
 	GET = iota
 	POST
@@ -17,7 +17,7 @@ const (
 	DELETE
 	OPTIONS
 	HEAD
-	NUM_VERBS
+	NUM_METHODS
 )
 
 // struct for user's to register all of their endpoints at once
@@ -51,7 +51,7 @@ func NewRouter() *router {
 }
 
 // register a handler for the specified path for the method
-func (r *router) handle(path string, verb int, handler http.Handler) {
+func (r *router) handle(path string, method int, handler http.Handler) {
 	// clean up path
 	path = cleanupPath(strings.NewReader(path))
 	currentRoute := r.routes[path]
@@ -60,14 +60,14 @@ func (r *router) handle(path string, verb int, handler http.Handler) {
 	if currentRoute == nil {
 		currentRoute = &route{
 			path:      path,
-			endpoints: make([]http.Handler, NUM_VERBS, NUM_VERBS),
+			endpoints: make([]http.Handler, NUM_METHODS, NUM_METHODS),
 		}
 		// set the new route
 		r.routes[path] = currentRoute
 	}
 
 	// set the handler
-	currentRoute.endpoints[verb] = handler
+	currentRoute.endpoints[method] = handler
 }
 
 // register handler for Get
@@ -106,8 +106,8 @@ func (r *router) Head(path string, handler http.Handler) {
 }
 
 // register handler for specified method
-func (r *router) HandleFunc(path string, verb int, handler http.HandlerFunc) {
-	r.handle(path, verb, handler)
+func (r *router) HandleFunc(path string, method int, handler http.HandlerFunc) {
+	r.handle(path, method, handler)
 }
 
 // register multiple handlers at once with an Endpoint struct
