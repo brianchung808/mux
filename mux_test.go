@@ -74,14 +74,22 @@ func TestNonExistingRouteResponse(t *testing.T) {
 			t.Fail()
 		}
 
-		w1 := httptest.NewRecorder()
-		router.ServeHTTP(w1, req)
-
-		w2 := httptest.NewRecorder()
-		http.NotFound(w2, req)
-
-		assert.Equal(t, w2.Body.String(), w1.Body.String(), "Incorrect body response")
+		expectNotFoundHandler(t, router, req)
 	}
+}
+
+func TestNonExistingMethodResponse(t *testing.T) {
+	router := NewRouter()
+
+	router.HandleFunc("/test1/", GET, func(w http.ResponseWriter, req *http.Request) {})
+
+	req, err := http.NewRequest("POST", "/test1/", nil)
+
+	if err != nil {
+		t.Fail()
+	}
+
+	expectNotFoundHandler(t, router, req)
 }
 
 func TestMultipleRouteData(t *testing.T) {
@@ -211,4 +219,15 @@ func testVerbs(t *testing.T, validVerbs []int, router *router) {
 			}
 		}
 	}
+}
+
+// test if handler is correctly Not Found Handler
+func expectNotFoundHandler(t *testing.T, router *router, req *http.Request) {
+	w1 := httptest.NewRecorder()
+	router.ServeHTTP(w1, req)
+
+	w2 := httptest.NewRecorder()
+	http.NotFound(w2, req)
+
+	assert.Equal(t, w2.Body.String(), w1.Body.String(), "Incorrect body response")
 }
