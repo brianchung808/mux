@@ -31,12 +31,6 @@ type Endpoint struct {
 	Head    http.HandlerFunc
 }
 
-// type route represents a route to the path with the specified handlers
-type route struct {
-	path      string
-	endpoints []http.Handler
-}
-
 // type router holds the routes that are being handled
 type router struct {
 	// (path_URI -> route) map.
@@ -153,15 +147,9 @@ func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		handler = http.NotFoundHandler()
 	} else {
 		// route exists
-		endpoints := route.endpoints
-		if endpoints != nil {
-			if handler = endpoints[methodEnum]; handler == nil {
-				// handler not found
-				handler = http.NotFoundHandler()
-			}
-		} else {
-			handler = http.NotFoundHandler()
-		}
+		// delegate to route.handle
+
+		handler = route.handler(methodEnum)
 	}
 
 	handler.ServeHTTP(w, req)
