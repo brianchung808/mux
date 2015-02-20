@@ -1,4 +1,5 @@
 // Package mux provides a http request multiplexer
+
 package mux
 
 import (
@@ -106,13 +107,29 @@ func (r router) HandleFunc(path string, method int, handler http.HandlerFunc) {
 
 // register multiple handlers at once with an Handlers struct
 func (r router) HandleAll(path string, h Handlers) {
-	r.Get(path, h.Get)
-	r.Post(path, h.Post)
-	r.Put(path, h.Put)
-	r.Patch(path, h.Patch)
-	r.Delete(path, h.Delete)
-	r.Options(path, h.Options)
-	r.Head(path, h.Head)
+	// must nil check before passing to 'handle', which
+	// takes the interface which cannot be null checked
+	if h.Get != nil {
+		r.Get(path, h.Get)
+	}
+	if h.Post != nil {
+		r.Post(path, h.Post)
+	}
+	if h.Put != nil {
+		r.Put(path, h.Put)
+	}
+	if h.Patch != nil {
+		r.Patch(path, h.Patch)
+	}
+	if h.Delete != nil {
+		r.Delete(path, h.Delete)
+	}
+	if h.Options != nil {
+		r.Options(path, h.Options)
+	}
+	if h.Head != nil {
+		r.Head(path, h.Head)
+	}
 }
 
 // satisfy http.Handler interface
